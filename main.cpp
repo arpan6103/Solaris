@@ -3,7 +3,17 @@
 #include "raylib.h"
 #include <vector>
 
-constexpr double G = 6.67430e-11;
+constexpr double G  = 6.67430e-11;
+const     double AU = 1.495978707e11;
+constexpr double SCALE = 2.0 / 1.495978707e11;
+
+Vector3 toRender(const Vec3& p) {
+    return {
+        static_cast<float>(p.x * SCALE),
+        static_cast<float>(p.y * SCALE),
+        static_cast<float>(p.z * SCALE)
+    };
+}
 
 std::vector<Vec3> computeAccelerations(const std::vector<Body>& bodies) {
     std::vector<Vec3> accelerations(bodies.size(), Vec3(0, 0, 0));
@@ -30,8 +40,6 @@ void step(std::vector<Body>& bodies, double dt) {
 }
 
 int main() {
-    // --- Set up the simulation (same as Step 5) ---
-    const double AU              = 1.495978707e11;
     const double SUN_MASS        = 1.989e30;
     const double EARTH_MASS      = 5.972e24;
     const double EARTH_ORBIT_VEL = 29784.8;
@@ -40,36 +48,73 @@ int main() {
     bodies.emplace_back(Vec3(0,  0, 0),  Vec3(0, 0, 0),                SUN_MASS);
     bodies.emplace_back(Vec3(AU, 0, 0),  Vec3(0, EARTH_ORBIT_VEL, 0),  EARTH_MASS);
 
-    // --- Set up the window ---
-    const int screenWidth  = 1200;
-    const int screenHeight = 800;
-    InitWindow(screenWidth, screenHeight, "Gravity Sim");
+    const float SUN_RADIUS   = 0.2f;
+    const float EARTH_RADIUS = 0.08f;
+
+    const double SIM_SECONDS_PER_FRAME   = 86400.0;
+    const int    PHYSICS_STEPS_PER_FRAME = 24;
+    const double DT = SIM_SECONDS_PER_FRAME / PHYSICS_STEPS_PER_FRAME;
+
+    InitWindow(1200, 800, "Gravity Sim");
     SetTargetFPS(60);
 
-    // --- Set up a 3D camera looking down at the scene ---
     Camera3D camera = { 0 };
-    camera.position   = { 0.0f, 5.0f, 5.0f };  // where the camera is
-    camera.target     = { 0.0f, 0.0f, 0.0f };  // where it's looking
-    camera.up         = { 0.0f, 1.0f, 0.0f };  // which way is "up"
-    camera.fovy       = 45.0f;                  // field of view (degrees)
+    camera.position   = { 0.0f, 5.0f, 5.0f };
+    camera.target     = { 0.0f, 0.0f, 0.0f };
+    camera.up         = { 0.0f, 1.0f, 0.0f };
+    camera.fovy       = 45.0f;
     camera.projection = CAMERA_PERSPECTIVE;
 
-    // --- Main loop ---
+    double simulatedSeconds = 0.0;
+
     while (!WindowShouldClose()) {
+        // Physics
+        for (int i = 0; i < PHYSICS_STEPS_PER_FRAME; ++i) {
+            step(bodies, DT);
+            simulatedSeconds += DT;
+        }
+
+        // Trails (once per frame)
+        for (auto& body : bodies) {
+            body.recordTrail();
+        }
+
+        // Render
         BeginDrawing();
             ClearBackground(BLACK);
             BeginMode3D(camera);
-                // Reference grid on the y=0 plane, just so we can see in 3D
                 DrawGrid(10, 1.0f);
 
-                // Placeholder: a yellow sphere at origin, a blue one to the side.
-                // We'll wire these to the bodies in the next step.
-                DrawSphere({0.0f, 0.0f, 0.0f}, 0.3f, YELLOW);
-                DrawSphere({2.0f, 0.0f, 0.0f}, 0.1f, BLUE);
+                for (size_t b = 0; b < bodies.size(); ++b) {
+                    Color trailColor = (b == 0) ? ORANGE : SKYBLUE;
+                    Color bodyColor  = (b == 0) ? YELLOW : BLUE;
+                    float radius     = (b == 0) ? SUN_RADIUS : EARTH_RADIUS;
+
+                    const auto& trail = bodies[b].trail;
+                    for (size_t i = 1; i < trail.size(); ++i) {
+                        DrawLine3D(toRender(trail[i - 1]),
+                                   toRender(trail[i]),
+                                   trailColor);
+                    }
+
+                    DrawSphere(toRender(bodies[b].position), radius, bodyColor);
+                }
             EndMode3D();
 
-            DrawText("Gravity Sim - Step 7", 10, 10, 20, RAYWHITE);
-            DrawFPS(10, 40);
+            DrawText("Gravity Sim", 10, 10, 20, RAYWHITE);
+            DrawText(TextFormat("Simulated days: %.1f", simulatedSeconds / 86400.0),
+                     10, 40, 18, RAYWHITE);
+            const Vec3& earthPos=bodies[1].position;
+            const Vec3& earthVel=bodies[1].velocity;
+            double earthDist=earthPos.magnitude();
+            double earthSpeed=earthVel.magnitude();
+                        DrawText("Earth:", 10, 80, 18, SKYBLUE);
+            DrawText(TextFormat("  Distance: %.4f AU", earthDist / AU),
+                     10, 105, 18, RAYWHITE);
+            DrawText(TextFormat("  Speed:    %.1f m/s  (%.2f km/s)",
+                                earthSpeed, earthSpeed / 1000.0),
+                     10, 130, 18, RAYWHITE);
+            DrawFPS(10, 165);
         EndDrawing();
     }
 
