@@ -68,6 +68,7 @@ int main() {
     double simulatedSeconds = 0.0;
 
     while (!WindowShouldClose()) {
+        //UpdateCamera(&camera,CAMERA_THIRD_PERSON);
         // Physics
         for (int i = 0; i < PHYSICS_STEPS_PER_FRAME; ++i) {
             step(bodies, DT);
@@ -92,9 +93,12 @@ int main() {
 
                     const auto& trail = bodies[b].trail;
                     for (size_t i = 1; i < trail.size(); ++i) {
+                        float t = static_cast<float>(i) / static_cast<float>(trail.size());
+                        unsigned char alpha = static_cast<unsigned char>(t*t*255);
+                        Color faded = { trailColor.r, trailColor.g, trailColor.b, alpha };
                         DrawLine3D(toRender(trail[i - 1]),
                                    toRender(trail[i]),
-                                   trailColor);
+                                   faded);
                     }
 
                     DrawSphere(toRender(bodies[b].position), radius, bodyColor);
