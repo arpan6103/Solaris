@@ -1,0 +1,1 @@
+A 3D N-body gravity simulator in C++. Built to learn orbital mechanics by watching it happen.
