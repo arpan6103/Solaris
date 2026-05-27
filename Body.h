@@ -6,12 +6,13 @@ struct Body{
     Vec3 position;
     Vec3 velocity;
     double mass;
+    bool isAsteroid=false;
 
     std::deque<Vec3>trail;
     size_t maxTrailLength=250;
 
-    Body(Vec3 pos, Vec3 vel, double m)
-        :position(pos),velocity(vel),mass(m){}
+    Body(Vec3 pos, Vec3 vel, double m,bool asteroid=false)
+        :position(pos),velocity(vel),mass(m),isAsteroid(asteroid){}
 
     void recordTrail(){
         trail.push_back(position);

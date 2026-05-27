@@ -4,10 +4,16 @@ INCLUDES = -I/opt/homebrew/include
 LIBS     = -L/opt/homebrew/lib -lraylib \
            -framework OpenGL -framework Cocoa -framework IOKit
 
-sim: main.cpp Vec3.h Body.h
-	$(CXX) $(CXXFLAGS) $(INCLUDES) main.cpp -o sim $(LIBS)
+SRCS = main.cpp Physics.cpp Renderer.cpp Camera.cpp
+OBJS = $(SRCS:.cpp=.o)
+
+sim: $(OBJS)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) -o sim $(LIBS)
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
-	rm -f sim
+	rm -f sim $(OBJS)
 
 .PHONY: clean
