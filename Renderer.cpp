@@ -51,6 +51,9 @@ void drawScene(
                 DrawLine3D(toRender(trail[i - 1]), toRender(trail[i]), faded);
             }
             DrawSphere(toRender(bodies[b].position), radius, bodyColor);
+            if (b == 6) {
+                drawSaturnRings(bodies[b], camera);
+            }
         }
     EndMode3D();
 
@@ -77,9 +80,13 @@ void drawOverlay(
     size_t numPlanets,
     double simulatedSeconds,
     double simSecondsPerFrame,
-    bool paused)
+    bool paused,
+    int followIndex)
 {
-    DrawText("Gravity Sim", 10, 10, 20, RAYWHITE);
+    const char* followName = (followIndex == 0) ? "Sun" : planetDefs[followIndex - 1].name;
+    Color followColor = (followIndex == 0) ? YELLOW : planetDefs[followIndex - 1].bodyColor;
+    DrawText(TextFormat("Following: %s  (0-8 to change)", followName),
+             10, 10, 16, followColor);
     DrawText(TextFormat("Simulated days: %.1f", simulatedSeconds / 86400.0),
              10, 35, 18, RAYWHITE);
 
@@ -101,7 +108,49 @@ void drawOverlay(
         textY += 22;
     }
 
-    DrawText("Arrows/WASD: orbit  Q/E or scroll: zoom  Space: pause  +/-: time  0: reset",
+    DrawText("Arrows/WASD: orbit  Q/E or scroll: zoom  Space: pause  +/-: time  R: reset time 0-8: follow",
              10, textY + 10, 13, GRAY);
     DrawFPS(10, textY + 35);
+}
+
+void drawSaturnRings(const Body& saturn, const Camera3D& camera) {
+    const float RING_INNER_R = 0.20f;   // just outside Saturn's sphere
+    const float RING_OUTER_R = 0.45f;   // outer edge
+    const int   RING_POINTS  = 800;
+    const int   RING_BANDS   = 6;
+    const float TILT         = 0.466f;  // 26.7 degrees
+
+    Vector3 satPos = toRender(saturn.position);
+
+    for (int band = 0; band < RING_BANDS; ++band) {
+        float t = (float)band / (float)(RING_BANDS - 1);
+        float r = RING_INNER_R + t * (RING_OUTER_R - RING_INNER_R);
+
+        unsigned char brightness = (unsigned char)(220 - t * 120);
+        Color ringColor = {
+            brightness,
+            brightness,
+            (unsigned char)(brightness * 0.85f),
+            200
+        };
+
+        for (int p = 0; p < RING_POINTS; ++p) {
+            float angle = (2.0f * 3.14159265f * p) / RING_POINTS;
+
+            float lx =  r * cosf(angle);
+            float lz =  r * sinf(angle);
+
+            float rx =  lx;
+            float ry = -lz * sinf(TILT);
+            float rz =  lz * cosf(TILT);
+
+            Vector3 point = {
+                satPos.x + rx,
+                satPos.y + ry,
+                satPos.z + rz
+            };
+
+            DrawPoint3D(point, ringColor);
+        }
+    }
 }

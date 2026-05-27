@@ -87,6 +87,7 @@ int main() {
     const int physicsStepsPerFrame = 24;
     bool paused = false;
     double simulatedSeconds = 0.0;
+    int followIndex = 0;
 
     InitWindow(1200, 800, "Gravity Sim");
     SetTargetFPS(60);
@@ -100,13 +101,13 @@ int main() {
 
     while (!WindowShouldClose()) {
         // Camera
-        updateCamera(camera);
+        updateCamera(camera, bodies, followIndex);
 
         // Time controls
         if (IsKeyPressed(KEY_SPACE)) paused = !paused;
         if (IsKeyDown(KEY_EQUAL)  || IsKeyDown(KEY_KP_ADD))      simSecondsPerFrame *= 1.05;
         if (IsKeyDown(KEY_MINUS)  || IsKeyDown(KEY_KP_SUBTRACT)) simSecondsPerFrame /= 1.05;
-        if (IsKeyPressed(KEY_ZERO)) simSecondsPerFrame = 86400.0;
+        if (IsKeyPressed(KEY_R)) simSecondsPerFrame = 86400.0;
 
         // Physics
         if (!paused) {
@@ -123,7 +124,7 @@ int main() {
             ClearBackground(BLACK);
             drawScene(bodies, planetDefs, NUM_PLANETS, camera, SUN_RADIUS);
             drawOverlay(bodies, planetDefs, NUM_PLANETS,
-                        simulatedSeconds, simSecondsPerFrame, paused);
+                        simulatedSeconds, simSecondsPerFrame, paused,followIndex);
         EndDrawing();
     }
 

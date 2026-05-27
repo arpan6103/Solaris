@@ -33,5 +33,8 @@ void drawOverlay(
     size_t numPlanets,
     double simulatedSeconds,
     double simSecondsPerFrame,
-    bool paused
+    bool paused,
+    int followIndex
 );
+
+void drawSaturnRings(const Body& saturn, const Camera3D& camera);
