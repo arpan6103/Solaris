@@ -21,6 +21,7 @@ void updateCamera(Camera3D& camera, const std::vector<Body>& bodies, int& follow
     if (IsKeyPressed(KEY_SIX))   followIndex = 6;
     if (IsKeyPressed(KEY_SEVEN)) followIndex = 7;
     if (IsKeyPressed(KEY_EIGHT)) followIndex = 8;
+    if (IsKeyPressed(KEY_NINE))  followIndex = 9;
 
     // Clamp to valid range
     if (followIndex < 0) followIndex = 0;

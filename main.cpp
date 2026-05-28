@@ -26,9 +26,29 @@ int main() {
     std::vector<Body> bodies;
 
     // Sun
-    bodies.emplace_back(Vec3(0, 0, 0), Vec3(0, 0, 0), SUN_MASS);
+   // --- Two stars, each half the Sun's mass, separated by 0.4 AU ---
+    const double STAR_MASS = SUN_MASS * 0.5;
+    const double HALF_SEP  = 0.2 * AU;
 
-    // Planets
+    // Orbital velocity for each star around their COM:
+    // v = sqrt(G * M_other / (2 * separation))
+    double starVel = std::sqrt(G * STAR_MASS / (2.0 * 2.0 * HALF_SEP));
+
+    // Star A: left, moving in -y
+    bodies.emplace_back(
+        Vec3(-HALF_SEP, 0, 0),
+        Vec3(0, -starVel, 0),
+        STAR_MASS
+    );
+
+    // Star B: right, moving in +y
+    bodies.emplace_back(
+        Vec3(HALF_SEP, 0, 0),
+        Vec3(0, starVel, 0),
+        STAR_MASS
+    );
+
+    // Planets — same orbits as before
     for (size_t i = 0; i < NUM_PLANETS; ++i) {
         Vec3 pos(planetDefs[i].orbitRadius * AU, 0, 0);
         Vec3 vel(0, planetDefs[i].orbitVel, 0);
@@ -46,10 +66,10 @@ int main() {
     for (auto& b : bodies) b.velocity -= comVelocity;
 
     // Asteroid belt
-    const int    NUM_ASTEROIDS  = 2000;
-    const double BELT_INNER     = 2.2;
-    const double BELT_OUTER     = 3.2;
-    const double ASTEROID_MASS  = 1e15;
+    const int    NUM_ASTEROIDS = 2000;
+    const double BELT_INNER    = 2.2;
+    const double BELT_OUTER    = 3.2;
+    const double ASTEROID_MASS = 1e15;
 
     srand(42);
     auto randFloat = [](double lo, double hi) {
@@ -59,25 +79,18 @@ int main() {
     for (int i = 0; i < NUM_ASTEROIDS; ++i) {
         double r     = randFloat(BELT_INNER, BELT_OUTER) * AU;
         double angle = randFloat(0.0, 2.0 * 3.14159265358979);
-        double incl  = randFloat(-0.035, 0.035);  // ±2 degrees
-
-        // Position: in x-y plane (same as planets), tiny z offset for inclination
+        double incl  = randFloat(-0.035, 0.035);
         Vec3 pos(
-            r * cos(angle),           // x
-            r * sin(angle),           // y  ← orbital plane, matches planets
-            r * sin(incl)             // z  ← tiny vertical scatter
+            r * cos(angle),
+            r * sin(angle),
+            r * sin(incl)
         );
-
-        // Circular orbital speed
         double speed = std::sqrt(G * SUN_MASS / r);
-
-        // Velocity perpendicular to position in x-y plane
         Vec3 vel(
-            -speed * sin(angle),      // x
-             speed * cos(angle),      // y
-             0.0                      // z  ← no vertical velocity component
+            -speed * sin(angle),
+             speed * cos(angle),
+             0.0
         );
-
         bodies.emplace_back(pos, vel, ASTEROID_MASS, true);
     }
     initStars(2000);

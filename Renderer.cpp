@@ -40,11 +40,18 @@ void drawScene(
             float radius;
 
             if (b == 0) {
-                trailColor = ORANGE;
+                // Star A — yellow
                 bodyColor  = YELLOW;
-                radius     = sunRadius;
+                trailColor = ORANGE;
+                radius     = 0.2f;
+            } else if (b == 1) {
+                // Star B — orange-white
+                bodyColor  = { 255, 200, 100, 255 };
+                trailColor = { 200, 120,  50, 255 };
+                radius     = 0.2f;
             } else {
-                const auto& def = planetDefs[b - 1];
+                // Planets — offset by 2 now (two stars before them)
+                const auto& def = planetDefs[b - 2];
                 trailColor = def.trailColor;
                 bodyColor  = def.bodyColor;
                 radius     = def.renderRadius;
@@ -58,16 +65,16 @@ void drawScene(
                 DrawLine3D(toRender(trail[i - 1]), toRender(trail[i]), faded);
             }
             DrawSphere(toRender(bodies[b].position), radius, bodyColor);
-            if (b == 6) {
+            if (b == 7) {
                 drawSaturnRings(bodies[b], camera);
             }
         }
     EndMode3D();
 
     // Planet labels (3D → 2D projection)
-    for (size_t b = 1; b < bodies.size(); ++b) {
+    for (size_t b = 2; b < bodies.size(); ++b) {
         if (bodies[b].isAsteroid) continue;
-        const auto& def = planetDefs[b - 1];
+        const auto& def = planetDefs[b - 2];
         Vector3 worldPos  = toRender(bodies[b].position);
         Vector2 screenPos = GetWorldToScreen(worldPos, camera);
         if (screenPos.x > -100 && screenPos.x < GetScreenWidth()  + 100 &&
@@ -90,8 +97,13 @@ void drawOverlay(
     bool paused,
     int followIndex)
 {
-    const char* followName = (followIndex == 0) ? "Sun" : planetDefs[followIndex - 1].name;
-    Color followColor = (followIndex == 0) ? YELLOW : planetDefs[followIndex - 1].bodyColor;
+    const char* followName;
+    Color followColor;
+    if      (followIndex == 0) { followName = "Star A"; followColor = YELLOW; }
+    else if (followIndex == 1) { followName = "Star B"; followColor = ORANGE; }
+    else { followName = planetDefs[followIndex - 2].name;
+           followColor = planetDefs[followIndex - 2].bodyColor; }
+
     DrawText(TextFormat("Following: %s  (0-8 to change)", followName),
              10, 10, 16, followColor);
     DrawText(TextFormat("Simulated days: %.1f", simulatedSeconds / 86400.0),
@@ -103,8 +115,8 @@ void drawOverlay(
              10, 60, 18, paused ? RED : LIME);
 
     int textY = 95;
-    for (size_t b = 1; b <= numPlanets; ++b) {
-        const auto& def = planetDefs[b - 1];
+    for (size_t b = 2; b <= numPlanets+1; ++b) {
+        const auto& def = planetDefs[b - 2];
         const Vec3& p = bodies[b].position;
         const Vec3& v = bodies[b].velocity;
         double dist  = p.magnitude() / AU;
@@ -115,7 +127,7 @@ void drawOverlay(
         textY += 22;
     }
 
-    DrawText("Arrows/WASD: orbit  Q/E or scroll: zoom  Space: pause  +/-: time  R: reset time 0-8: follow",
+    DrawText("Arrows/WASD: orbit  Q/E or scroll: zoom  Space: pause  +/-: time  R: reset 0-1: stars time 2-9: planets",
              10, textY + 10, 13, GRAY);
     DrawFPS(10, textY + 35);
 }
