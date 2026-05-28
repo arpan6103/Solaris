@@ -49,12 +49,17 @@ void drawScene(
                 bodyColor  = { 255, 200, 100, 255 };
                 trailColor = { 200, 120,  50, 255 };
                 radius     = 0.2f;
-            } else {
-                // Planets — offset by 2 now (two stars before them)
+            } else if (b - 2 < numPlanets) {
+                // Planets
                 const auto& def = planetDefs[b - 2];
                 trailColor = def.trailColor;
                 bodyColor  = def.bodyColor;
                 radius     = def.renderRadius;
+            } else {
+                // Comet — icy blue-white, small
+                bodyColor  = { 180, 220, 255, 255 };  // ice blue
+                trailColor = { 150, 200, 255, 255 };  // lighter blue trail
+                radius     = 0.03f;
             }
 
             const auto& trail = bodies[b].trail;
@@ -74,6 +79,7 @@ void drawScene(
     // Planet labels (3D → 2D projection)
     for (size_t b = 2; b < bodies.size(); ++b) {
         if (bodies[b].isAsteroid) continue;
+        if (b - 2 >= numPlanets) continue;
         const auto& def = planetDefs[b - 2];
         Vector3 worldPos  = toRender(bodies[b].position);
         Vector2 screenPos = GetWorldToScreen(worldPos, camera);

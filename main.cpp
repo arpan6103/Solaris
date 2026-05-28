@@ -93,6 +93,22 @@ int main() {
         );
         bodies.emplace_back(pos, vel, ASTEROID_MASS, true);
     }
+    // --- Halley-style comet ---
+    {
+        const double COMET_PERIHELION = 0.6  * AU;   // closest approach
+        const double COMET_APHELION   = 35.0 * AU;   // farthest point
+        const double COMET_MASS       = 2.2e14;       // kg (tiny)
+
+        double a       = (COMET_PERIHELION + COMET_APHELION) / 2.0;
+        double v_apo   = std::sqrt(G * SUN_MASS * (2.0/COMET_APHELION - 1.0/a));
+
+        // Start at aphelion on the -x axis, moving in +y (retrograde — like Halley's)
+        Vec3 cometPos(-COMET_APHELION, 0, 0);
+        Vec3 cometVel(0, -v_apo, 0);   // negative = retrograde orbit
+
+        bodies.emplace_back(cometPos, cometVel, COMET_MASS);
+        bodies.back().maxTrailLength = 3000;
+    }
     initStars(2000);
 
     // Window + camera
