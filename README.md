@@ -32,8 +32,6 @@ A real-time N-body gravity simulator written in C++ using raylib. Simulates a bi
 
 **Kepler's second law**: the comet trail is dense near the stars (fast) and sparse far out (slow). Equal areas swept in equal times, drawn by the physics itself.
 
-**Jupiter as shield**: Jupiter's gravity actively deflects asteroids every frame. The asteroid belt thins over time as Jupiter clears its neighborhood.
-
 **Binary wobble**: zoom in on the two stars and watch their trails — matching curves orbiting the center of mass, mirror images of each other. Newton's third law made visible.
 
 **Orbital precession at high time speed**: crank the time scale very high and watch inner planets trace spirograph patterns — integration error accumulates as artificial precession, visually identical to real Mercury precession (which is caused by General Relativity).
