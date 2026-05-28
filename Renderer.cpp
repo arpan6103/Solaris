@@ -1,6 +1,12 @@
 #include "Renderer.h"
 #include <cmath>
 
+struct Star{
+    Vector3 position;
+    Color color;
+};
+static std::vector<Star>stars;
+
 const double AU    = 1.495978707e11;
 const double SCALE = 2.0 / 1.495978707e11;
 
@@ -20,6 +26,7 @@ void drawScene(
     float sunRadius)
 {
     BeginMode3D(camera);
+        drawStars(camera.position);
         DrawGrid(60, 2.0f);
 
         for (size_t b = 0; b < bodies.size(); ++b) {
@@ -152,5 +159,36 @@ void drawSaturnRings(const Body& saturn, const Camera3D& camera) {
 
             DrawPoint3D(point, ringColor);
         }
+    }
+}
+
+void initStars(int count){
+    stars.reserve(count);
+    for(int i=0;i<count;i++){
+        float theta=(float)(rand()/(double)RAND_MAX*2.0f*3.14159265f);
+        float phi=acosf(1.0f-2.0f*(float)(rand()/(double)RAND_MAX));
+        float radius=350.0f+(float)(rand()/(double)RAND_MAX)*100.0f;
+
+        Star s;
+        s.position={
+            radius*sinf(phi)*cosf(theta),
+            radius*cos(phi),
+            radius*sinf(phi)*sinf(theta)
+        };
+        unsigned char brightness=140+(unsigned char)(rand()%115);
+        unsigned char warmth=(unsigned char)(rand()%30);
+        s.color={brightness,brightness,(unsigned char)(brightness-warmth),255};
+        stars.push_back(s);
+    }
+}
+
+void drawStars(Vector3 cameraPos){
+    for(const auto& s:stars){
+        Vector3 pos={
+            s.position.x+cameraPos.x,
+            s.position.y+cameraPos.y,
+            s.position.z+cameraPos.z
+        };
+        DrawPoint3D(pos,s.color);
     }
 }

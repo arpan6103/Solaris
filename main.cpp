@@ -80,6 +80,7 @@ int main() {
 
         bodies.emplace_back(pos, vel, ASTEROID_MASS, true);
     }
+    initStars(2000);
 
     // Window + camera
     const float SUN_RADIUS = 0.15f;

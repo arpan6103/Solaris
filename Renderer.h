@@ -38,3 +38,6 @@ void drawOverlay(
 );
 
 void drawSaturnRings(const Body& saturn, const Camera3D& camera);
+
+void initStars(int count=2000);
+void drawStars(Vector3 cameraPos);
