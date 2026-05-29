@@ -8,9 +8,10 @@ A real-time N-body gravity simulator written in C++ using raylib. Simulates a bi
 
 ## What it simulates
 
-- **Binary star system** — two stars orbiting their common center of mass. Inner planets (Mercury, Venus) get ejected over time due to chaotic gravitational dynamics. Outer planets find stable circumbinary orbits.
+- **Binary star system** — two full solar-mass stars orbiting their common center of mass, separated by 0.4 AU. Inner planets (Mercury, Venus) get ejected due to chaotic gravitational dynamics. Outer planets find stable circumbinary orbits.
 - **8 planets** — Mercury through Neptune, with real masses, orbital radii, and velocities from NASA data.
-- **2000-body asteroid belt** — randomly distributed between Mars (1.52 AU) and Jupiter (5.20 AU). Jupiter actively deflects asteroids every frame. Asteroid-asteroid gravity is skipped for performance (physically justified — they're too light to matter).
+- **Mercury gets ejected**: each star is a full solar mass. The binary separation (0.4 AU) exceeds Mercury's orbital radius (0.387 AU) — Mercury literally orbits between the two stars, getting yanked in opposite directions until flung out. Venus (0.723 AU) sits below the circumbinary stability threshold (~0.8–1.6 AU) and follows shortly after.
+- **2000-body asteroid belt** — randomly distributed between Mars (1.52 AU) and Jupiter (5.20 AU). Asteroid-asteroid gravity is skipped for performance (physically justified — they're too light to matter).
 - **Saturn's rings** — 6 concentric bands of 800 points each, tilted 26.7° to match Saturn's real axial tilt.
 - **Halley-style comet** — highly elliptical retrograde orbit, tilted 30° out of the orbital plane. Trail is dense near the stars (fast) and sparse far out (slow) — Kepler's second law made visible.
 - **2000 background stars** — scattered on a sphere around the scene for spatial reference.
