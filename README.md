@@ -1,8 +1,8 @@
-# Gravity Sim
+# Solaris
 
 A real-time N-body gravity simulator written in C++ using raylib. Simulates a binary star system with all 8 planets, an asteroid belt, Saturn's rings, and a Halley-style comet — all governed by Newton's law of gravitation.
 
-![Gravity Sim](screenshot.png)
+![Solaris](screenshot.png)
 
 ---
 
