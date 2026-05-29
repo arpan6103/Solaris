@@ -27,7 +27,7 @@ int main() {
 
     // Sun
    // --- Two stars, each half the Sun's mass, separated by 0.4 AU ---
-    const double STAR_MASS = SUN_MASS * 0.5;
+    const double STAR_MASS = SUN_MASS ;
     const double HALF_SEP  = 0.2 * AU;
 
     // Orbital velocity for each star around their COM:
@@ -49,10 +49,13 @@ int main() {
     );
 
     // Planets — same orbits as before
+    const double TOTAL_STAR_MASS = 2.0 * STAR_MASS;  // combined mass both stars
     for (size_t i = 0; i < NUM_PLANETS; ++i) {
-        Vec3 pos(planetDefs[i].orbitRadius * AU, 0, 0);
-        Vec3 vel(0, planetDefs[i].orbitVel, 0);
-        bodies.emplace_back(pos, vel, planetDefs[i].mass);
+        double r   = planetDefs[i].orbitRadius * AU;
+        double vel = std::sqrt(G * TOTAL_STAR_MASS / r);  // derived, not hardcoded
+        Vec3 pos(r, 0, 0);
+        Vec3 velocity(0, vel, 0);
+        bodies.emplace_back(pos, velocity, planetDefs[i].mass);
     }
 
     // Cancel COM drift
@@ -85,7 +88,7 @@ int main() {
             r * sin(angle),
             r * sin(incl)
         );
-        double speed = std::sqrt(G * SUN_MASS / r);
+        double speed = std::sqrt(G * TOTAL_STAR_MASS / r);
         Vec3 vel(
             -speed * sin(angle),
              speed * cos(angle),
@@ -100,7 +103,7 @@ int main() {
         const double COMET_MASS       = 2.2e14;       // kg (tiny)
 
         double a       = (COMET_PERIHELION + COMET_APHELION) / 2.0;
-        double v_apo   = std::sqrt(G * SUN_MASS * (2.0/COMET_APHELION - 1.0/a));
+        double v_apo   = std::sqrt(G * TOTAL_STAR_MASS * (2.0/COMET_APHELION - 1.0/a));
 
         // Start at aphelion on the -x axis, moving in +y (retrograde — like Halley's)
         Vec3 cometPos(-COMET_APHELION, 0, 0);
